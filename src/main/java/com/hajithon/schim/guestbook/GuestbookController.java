@@ -4,6 +4,7 @@ import com.hajithon.schim.common.auth.LoginUser;
 import com.hajithon.schim.common.response.ApiResponse;
 import com.hajithon.schim.guestbook.dto.GuestbookCreateRequest;
 import com.hajithon.schim.guestbook.dto.GuestbookCreateResponse;
+import com.hajithon.schim.guestbook.dto.GuestbookDetailResponse;
 import com.hajithon.schim.guestbook.dto.GuestbookOpenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,15 @@ public class GuestbookController {
             @PathVariable Long guestbookId
     ) {
         GuestbookOpenResponse response = guestbookService.open(userId, guestbookId);
+
+        return ResponseEntity.ok(ApiResponse.of(response));
+    }
+
+    @GetMapping("/me/guestbooks/{guestbookId}")
+    public ResponseEntity<ApiResponse<GuestbookDetailResponse>> getMyGuestbookDetail(
+            @LoginUser UUID userId, @PathVariable Long guestbookId
+    ) {
+        GuestbookDetailResponse response = guestbookService.getMyGuestbookDetail(userId, guestbookId);
 
         return ResponseEntity.ok(ApiResponse.of(response));
     }

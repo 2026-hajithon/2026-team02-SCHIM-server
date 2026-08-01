@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface DiscoveryRepository extends JpaRepository<Discovery, Long> {
     Optional<Discovery> findByUserIdAndGuestbookId(UUID userId, Long guestbookID);
+    long countByGuestbookId(Long guestbookId);
 }

@@ -8,6 +8,7 @@ import com.hajithon.schim.content.dto.ContentSearchResponse;
 import com.hajithon.schim.discovery.Discovery;
 import com.hajithon.schim.discovery.DiscoveryRepository;
 import com.hajithon.schim.guestbook.dto.GuestbookCreateRequest;
+import com.hajithon.schim.guestbook.dto.GuestbookDetailResponse;
 import com.hajithon.schim.guestbook.dto.GuestbookOpenResponse;
 import com.hajithon.schim.savedcontent.SavedContentRepository;
 import com.hajithon.schim.storage.StorageService;
@@ -31,6 +32,7 @@ public class GuestbookServiceImpl implements GuestbookService {
     private final DiscoveryRepository discoveryRepository;
     private final UserRepository userRepository;
     private final SavedContentRepository savedContentRepository;
+    private final GuestbookPassRepository guestbookPassRepository;
 
     @Override
     @Transactional
@@ -79,6 +81,27 @@ public class GuestbookServiceImpl implements GuestbookService {
                 author.getNickname(),
                 saved,
                 discovery.getOpenedAt()
+        );
+    }
+
+    @Override
+    public GuestbookDetailResponse getMyGuestbookDetail(UUID userId, Long guestbookId) {
+        Guestbook guestbook = guestbookRepository.findById(guestbookId)
+                .filter(g -> g.getDeletedAt() == null)
+                .orElseThrow(() -> new BusinessException(ErrorCode.GUESTBOOK_NOT_FOUND));
+
+        if (!guestbook.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.GUESTBOOK_FORBIDDEN);
+        }
+
+        ContentSearchResponse content = contentService.getDetail(guestbook.getContentId());
+        long passCount = guestbookPassRepository.countByGuestbookId(guestbookId);
+        long openCount = discoveryRepository.countByGuestbookId(guestbookId);
+
+        return new GuestbookDetailResponse(
+                guestbook.getId(), guestbook.getImageUrl(), content,
+                new GuestbookDetailResponse.Stats(passCount, openCount),
+                guestbook.getCreatedAt(), guestbook.getUpdatedAt()
         );
     }
 }
