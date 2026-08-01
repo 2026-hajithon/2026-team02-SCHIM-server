@@ -26,6 +26,7 @@ public class ContentSearchImpl implements ContentService{
     private final PlaceDetailRepository placeDetailRepository;
     private final PerformanceDetailRepository performanceDetailRepository;
     private final List<ContentSearchPort> searchPorts;
+    private final ObjectMapper objectMapper;
 
     @Override
     public ContentSearchPage search(ContentSearchQuery query) {
