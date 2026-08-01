@@ -16,7 +16,7 @@ public enum ErrorCode {
 
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 없거나 형식에 맞지 않습니다."),
     USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "토큰에 해당하는 사용자가 없습니다."),
-    CANNOT_OPEN_OWN_GUESTBOOK(HttpStatus.UNAUTHORIZED, "자신의 방명록을 열 수 없습니다."),
+    CANNOT_OPEN_OWN_GUESTBOOK(HttpStatus.BAD_REQUEST, "자신의 방명록을 열 수 없습니다."),
     GUESTBOOK_FORBIDDEN(HttpStatus.FORBIDDEN, "다른 사람의 방명록을 수정 및 삭제할 수 없습니다."),
 
     GUESTBOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "방명록을 찾을 수 없습니다."),
