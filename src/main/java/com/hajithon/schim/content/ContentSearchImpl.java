@@ -189,6 +189,6 @@ public class ContentSearchImpl implements ContentService {
     }
 
     private long countGuestbooks(Content content) {
-        return 0L; // TODO: 방명록 도메인 생기면 실제 COUNT 쿼리로 교체
+        return contentRepository.countGuestbooksByContentId(content.getId());
     }
 }
