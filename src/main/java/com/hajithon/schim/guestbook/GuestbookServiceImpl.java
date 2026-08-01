@@ -9,6 +9,7 @@ import com.hajithon.schim.discovery.Discovery;
 import com.hajithon.schim.discovery.DiscoveryRepository;
 import com.hajithon.schim.guestbook.dto.GuestbookCreateRequest;
 import com.hajithon.schim.guestbook.dto.GuestbookOpenResponse;
+import com.hajithon.schim.savedcontent.SavedContentRepository;
 import com.hajithon.schim.storage.StorageService;
 import com.hajithon.schim.user.User;
 import com.hajithon.schim.user.UserRepository;
@@ -29,6 +30,7 @@ public class GuestbookServiceImpl implements GuestbookService {
     private final GuestbookImageValidator imageValidator;
     private final DiscoveryRepository discoveryRepository;
     private final UserRepository userRepository;
+    private final SavedContentRepository savedContentRepository;
 
     @Override
     @Transactional
@@ -69,11 +71,13 @@ public class GuestbookServiceImpl implements GuestbookService {
         User author = userRepository.findById(guestbook.getUserId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        boolean saved = savedContentRepository.existsByUserIdAndContentId(userId, guestbook.getContentId());
+
         return new GuestbookOpenResponse(
                 guestbook.getId(),
                 content,
                 author.getNickname(),
-                false,
+                saved,
                 discovery.getOpenedAt()
         );
     }
