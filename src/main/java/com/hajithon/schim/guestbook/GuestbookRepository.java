@@ -16,7 +16,7 @@ public interface GuestbookRepository extends JpaRepository<Guestbook, Long> {
             SELECT g.id AS guestbookId, g.image_url AS imageUrl,
             u.nickname AS authorNickname, g.created_at AS createdAt
             FROM guestbooks g
-            JOIN users u ON u.id = g.user_id
+            JOIN member m ON m.id = g.user_id
             WHERE g.user_id <> :userId
               AND g.deleted_at IS NULL
               AND NOT EXISTS (SELECT 1 FROM discoveries d WHERE d.guestbook_id = g.id AND d.user_id = :userId)
@@ -36,7 +36,7 @@ public interface GuestbookRepository extends JpaRepository<Guestbook, Long> {
     @Query(value = """
             SELECT g.id AS guestbookId, g.image_url AS imageUrl, u.nickname AS authorNickname, g.created_at AS createdAt
             FROM guestbooks g
-            JOIN users u ON u.id = g.user_id
+            JOIN member m ON m.id = g.user_id
             WHERE g.user_id <> :userId
               AND g.deleted_at IS NULL
               AND NOT EXISTS (SELECT 1 FROM discoveries d WHERE d.guestbook_id = g.id AND d.user_id = :userId)
