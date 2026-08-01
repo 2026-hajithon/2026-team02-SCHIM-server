@@ -3,6 +3,7 @@ package com.hajithon.schim.common.auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -26,6 +27,14 @@ public class WebConfig implements WebMvcConfigurer {
                         "/swagger-ui/**",
                         "/v3/api-docs/**"
                 );
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("https://02-schim-web.vercel.app")
+                .allowedMethods("GET", "POST", "PATCH", "DELETE", "OPTIONS")
+                .allowedHeaders("*");
     }
 
     @Override
