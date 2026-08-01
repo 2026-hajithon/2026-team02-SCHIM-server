@@ -1,6 +1,7 @@
 package com.hajithon.schim.guestbook;
 
 import com.hajithon.schim.surf.SurfRow;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -51,5 +52,20 @@ public interface GuestbookRepository extends JpaRepository<Guestbook, Long> {
             @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt,
             @Param("cursorId") Long cursorId,
             @Param("limit") int limit
+    );
+
+    @Query("""
+        SELECT g FROM Guestbook g
+        WHERE g.contentId = :contentId
+          AND g.deletedAt IS NULL
+          AND (:hasCursor = false OR g.createdAt < :cursorCreatedAt OR (g.createdAt = :cursorCreatedAt AND g.id < :cursorId))
+        ORDER BY g.createdAt DESC, g.id DESC
+        """)
+    List<Guestbook> findByContentIdWithCursor(
+            @Param("contentId") Long contentId,
+            @Param("hasCursor") boolean hasCursor,
+            @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
     );
 }

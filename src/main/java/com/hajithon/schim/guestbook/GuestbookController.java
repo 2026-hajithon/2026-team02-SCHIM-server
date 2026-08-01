@@ -2,16 +2,14 @@ package com.hajithon.schim.guestbook;
 
 import com.hajithon.schim.common.auth.LoginUser;
 import com.hajithon.schim.common.response.ApiResponse;
-import com.hajithon.schim.guestbook.dto.GuestbookCreateRequest;
-import com.hajithon.schim.guestbook.dto.GuestbookCreateResponse;
-import com.hajithon.schim.guestbook.dto.GuestbookDetailResponse;
-import com.hajithon.schim.guestbook.dto.GuestbookOpenResponse;
+import com.hajithon.schim.guestbook.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -48,5 +46,19 @@ public class GuestbookController {
         GuestbookDetailResponse response = guestbookService.getMyGuestbookDetail(userId, guestbookId);
 
         return ResponseEntity.ok(ApiResponse.of(response));
+    }
+
+    @GetMapping("/contents/{contentId}/guestbooks")
+    public ResponseEntity<ApiResponse<List<ContentGuestbookItem>>> getGuestbooksByContent(
+            @LoginUser UUID userId,
+            @PathVariable Long contentId,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(defaultValue = "20") int limit
+) {
+        ContentGuestbookPage page = guestbookService.getGuestbooksByContent(userId, contentId, cursor, limit);
+        return ResponseEntity.ok(ApiResponse.of(page.items(), new ContentGuestbookMeta(page.nextCursor(), page.hasNext())));
+    }
+
+    private record ContentGuestbookMeta(String nextCursor, boolean hasNext) {
     }
 }

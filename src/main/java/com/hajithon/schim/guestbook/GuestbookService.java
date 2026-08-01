@@ -1,5 +1,6 @@
 package com.hajithon.schim.guestbook;
 
+import com.hajithon.schim.guestbook.dto.ContentGuestbookPage;
 import com.hajithon.schim.guestbook.dto.GuestbookCreateRequest;
 import com.hajithon.schim.guestbook.dto.GuestbookDetailResponse;
 import com.hajithon.schim.guestbook.dto.GuestbookOpenResponse;
@@ -13,4 +14,6 @@ public interface GuestbookService {
     GuestbookOpenResponse open(UUID userId, Long guestbookId);
 
     GuestbookDetailResponse getMyGuestbookDetail(UUID userId, Long guestbookId);
+
+    ContentGuestbookPage getGuestbooksByContent(UUID userId, Long contentId, String cursor, int limit);
 }

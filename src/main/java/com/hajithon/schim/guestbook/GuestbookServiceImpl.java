@@ -7,19 +7,21 @@ import com.hajithon.schim.content.ContentService;
 import com.hajithon.schim.content.dto.ContentSearchResponse;
 import com.hajithon.schim.discovery.Discovery;
 import com.hajithon.schim.discovery.DiscoveryRepository;
-import com.hajithon.schim.guestbook.dto.GuestbookCreateRequest;
-import com.hajithon.schim.guestbook.dto.GuestbookDetailResponse;
-import com.hajithon.schim.guestbook.dto.GuestbookOpenResponse;
+import com.hajithon.schim.guestbook.dto.*;
 import com.hajithon.schim.savedcontent.SavedContentRepository;
 import com.hajithon.schim.storage.StorageService;
+import com.hajithon.schim.surf.SurfCursor;
 import com.hajithon.schim.user.User;
 import com.hajithon.schim.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -103,5 +105,44 @@ public class GuestbookServiceImpl implements GuestbookService {
                 new GuestbookDetailResponse.Stats(passCount, openCount),
                 guestbook.getCreatedAt(), guestbook.getUpdatedAt()
         );
+    }
+
+    @Override
+    public ContentGuestbookPage getGuestbooksByContent(UUID userId, Long contentId, String cursor, int limit) {
+        int size = Math.min(limit <= 0 ? 20 : limit, 50);
+
+        boolean hasCursor = cursor != null && !cursor.isBlank();
+        LocalDateTime cursorCreatedAt = null;
+        Long cursorId = null;
+        if (hasCursor) {
+            SurfCursor.Decoded decoded = SurfCursor.decode(cursor);
+            cursorCreatedAt = decoded.createdAt();
+            cursorId = decoded.id();
+        }
+
+        List<Guestbook> rows = guestbookRepository.findByContentIdWithCursor(
+                contentId, hasCursor, cursorCreatedAt, cursorId, PageRequest.of(0, size + 1)
+        );
+
+        boolean hasNext = rows.size() > size;
+        List<Guestbook> page = hasNext ? rows.subList(0, size) : rows;
+
+        Set<UUID> authorIds = page.stream().map(Guestbook::getUserId).collect(Collectors.toSet());
+        Map<UUID, String> nicknameByUserId = userRepository.findAllById(authorIds).stream()
+                .collect(Collectors.toMap(User::getId, User::getNickname));
+
+        List<ContentGuestbookItem> items = new ArrayList<>();
+        for (Guestbook g : page) {
+            items.add(new ContentGuestbookItem(
+                    g.getId(), g.getImageUrl(), nicknameByUserId.get(g.getUserId()),
+                    g.getUserId().equals(userId), g.getCreatedAt()
+            ));
+        }
+
+        String nextCursor = hasNext
+                ? SurfCursor.encode(page.get(page.size() - 1).getCreatedAt(), page.get(page.size() - 1).getId())
+                : null;
+
+        return new ContentGuestbookPage(items, hasNext, nextCursor);
     }
 }
