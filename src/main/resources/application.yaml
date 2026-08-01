@@ -17,4 +17,11 @@ server:
   port: ${PORT:8080}
 
 kakao:
-  rest-api-key: ${KAKAO_REST_API_KEY}
+  rest-api-key: ${KAKAO_REST_API_KEY:}
+
+r2:
+  access-key: ${R2_ACCESS_KEY:}
+  secret-key: ${R2_SECRET_KEY:}
+  endpoint: ${R2_ENDPOINT:https://example.r2.cloudflarestorage.com}
+  bucket: ${R2_BUCKET:schim}
+  public-base-url: ${R2_PUBLIC_BASE_URL:https://example.com}
