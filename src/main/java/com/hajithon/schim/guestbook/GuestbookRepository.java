@@ -14,7 +14,7 @@ public interface GuestbookRepository extends JpaRepository<Guestbook, Long> {
     // 무지성 SQL
     @Query(value = """
             SELECT g.id AS guestbookId, g.image_url AS imageUrl,
-            u.nickname AS authorNickname, g.created_at AS createdAt
+            m.nickname AS authorNickname, g.created_at AS createdAt
             FROM guestbooks g
             JOIN member m ON m.id = g.user_id
             WHERE g.user_id <> :userId
@@ -34,7 +34,7 @@ public interface GuestbookRepository extends JpaRepository<Guestbook, Long> {
     );
 
     @Query(value = """
-            SELECT g.id AS guestbookId, g.image_url AS imageUrl, u.nickname AS authorNickname, g.created_at AS createdAt
+            SELECT g.id AS guestbookId, g.image_url AS imageUrl, m.nickname AS authorNickname, g.created_at AS createdAt
             FROM guestbooks g
             JOIN member m ON m.id = g.user_id
             WHERE g.user_id <> :userId
