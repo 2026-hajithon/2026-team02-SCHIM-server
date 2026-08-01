@@ -2,6 +2,8 @@ package com.hajithon.schim.common.auth;
 
 import com.hajithon.schim.common.exception.BusinessException;
 import com.hajithon.schim.common.exception.ErrorCode;
+import com.hajithon.schim.user.User;
+import com.hajithon.schim.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +19,10 @@ public class AuthInterceptor implements HandlerInterceptor {
     public static final String LOGIN_USER_ID_ATTRIBUTE = "loginUserId";
     private static final String BEARER_PREFIX = "Bearer ";
     // 구현 예정
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
-    public boolean preHandler(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith(BEARER_PREFIX)) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
@@ -28,8 +30,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         UUID token = parseToken(header.substring(BEARER_PREFIX.length()).trim());
 
-        User user = userRepository.findByAnonymousToken(token)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = userService.getByToken(token);
 
         request.setAttribute(LOGIN_USER_ID_ATTRIBUTE, user.getId());
 
