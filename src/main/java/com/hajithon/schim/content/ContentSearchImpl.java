@@ -17,7 +17,8 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ContentSearchImpl implements ContentService{
+public class ContentSearchImpl implements ContentService {
+
 
     private final ContentRepository contentRepository;
     private final BookDetailRepository bookDetailRepository;
@@ -43,7 +44,7 @@ public class ContentSearchImpl implements ContentService{
 
             for (ExternalContent external : externalPage.contents()) {
                 Optional<Content> matched = contentRepository
-                        .findByProviderAndExternalId(external.provider(),external.externalId());
+                        .findByProviderAndExternalId(external.provider(), external.externalId());
                 if (matched.isPresent()) {
                     Content content = matched.get();
                     usedContentIds.add(content.getId());
@@ -79,6 +80,14 @@ public class ContentSearchImpl implements ContentService{
 
         return contentRepository.findByProviderAndExternalId(provider, externalId)
                 .orElseGet(() -> createContent(command, provider, externalId));
+    }
+
+    @Override
+    public ContentSearchResponse getDetail(Long contentId) {
+        Content content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CONTENT_NOT_FOUND));
+
+        return toResponse(content);
     }
 
     private Content createContent(ResolveContentCommand command, Provider provider, String externalId) {

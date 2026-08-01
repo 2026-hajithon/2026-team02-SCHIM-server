@@ -1,9 +1,17 @@
 package com.hajithon.schim.guestbook;
 
+import com.hajithon.schim.common.exception.BusinessException;
+import com.hajithon.schim.common.exception.ErrorCode;
 import com.hajithon.schim.content.Content;
 import com.hajithon.schim.content.ContentService;
+import com.hajithon.schim.content.dto.ContentSearchResponse;
+import com.hajithon.schim.discovery.Discovery;
+import com.hajithon.schim.discovery.DiscoveryRepository;
 import com.hajithon.schim.guestbook.dto.GuestbookCreateRequest;
+import com.hajithon.schim.guestbook.dto.GuestbookOpenResponse;
 import com.hajithon.schim.storage.StorageService;
+import com.hajithon.schim.user.User;
+import com.hajithon.schim.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +27,8 @@ public class GuestbookServiceImpl implements GuestbookService {
     private final ContentService contentService;
     private final StorageService storageService;
     private final GuestbookImageValidator imageValidator;
+    private final DiscoveryRepository discoveryRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -37,5 +47,34 @@ public class GuestbookServiceImpl implements GuestbookService {
             storageService.delete(imageUrl);
             throw e;
         }
+    }
+
+    @Override
+    public GuestbookOpenResponse open(UUID userId, Long guestbookId) {
+        Guestbook guestbook = guestbookRepository.findById(guestbookId)
+                .filter(g -> g.getDeletedAt() == null)
+                .orElseThrow(() -> new BusinessException(ErrorCode.GUESTBOOK_NOT_FOUND));
+
+        if (guestbook.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.CANNOT_OPEN_OWN_GUESTBOOK);
+        }
+
+        Discovery discovery = discoveryRepository
+                .findByUserIdAndGuestbookId(userId, guestbookId)
+                .orElseGet(() -> discoveryRepository.save(
+                        Discovery.create(userId, guestbookId, guestbook.getContentId())
+                ));
+
+        ContentSearchResponse content = contentService.getDetail(guestbook.getContentId());
+        User author = userRepository.findById(guestbook.getUserId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        return new GuestbookOpenResponse(
+                guestbook.getId(),
+                content,
+                author.getNickname(),
+                false,
+                discovery.getOpenedAt()
+        );
     }
 }

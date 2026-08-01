@@ -4,13 +4,11 @@ import com.hajithon.schim.common.auth.LoginUser;
 import com.hajithon.schim.common.response.ApiResponse;
 import com.hajithon.schim.guestbook.dto.GuestbookCreateRequest;
 import com.hajithon.schim.guestbook.dto.GuestbookCreateResponse;
+import com.hajithon.schim.guestbook.dto.GuestbookOpenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
@@ -32,4 +30,13 @@ public class GuestbookController {
                 .body(ApiResponse.of(GuestbookCreateResponse.from(guestbook)));
     }
 
+    @PostMapping("/guestbooks/{guestbookId}/open")
+    public ResponseEntity<ApiResponse<GuestbookOpenResponse>> open(
+            @LoginUser UUID userId,
+            @PathVariable Long guestbookId
+    ) {
+        GuestbookOpenResponse response = guestbookService.open(userId, guestbookId);
+
+        return ResponseEntity.ok(ApiResponse.of(response));
+    }
 }
