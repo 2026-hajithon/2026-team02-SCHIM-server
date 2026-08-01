@@ -56,6 +56,13 @@ public class GuestbookImageValidator {
         if (width > MAX_WIDTH || height > MAX_HEIGHT) {
             throw new BusinessException(ErrorCode.IMAGE_DIMENSION_EXCEEDED);
         }
+
+        double ratio = (double) width / height;
+        if(Math.abs(ratio - TARGET_RATIO) > TARGET_RATIO * RATIO_TOLERANCE)
+        {
+            // 에러코드 그냥 일단 크다고 해놨음. 추후 바꾸기.
+            throw new BusinessException(ErrorCode.IMAGE_TOO_LARGE);
+        }
     }
 
     private boolean isPng(byte[] bytes) {
